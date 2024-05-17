@@ -35,7 +35,7 @@ export function SignUp(){
 
                 <Button title="Cadastrar"></Button>
 
-                <a href="#">Voltar para o login</a>
+                <a href="/">Voltar para o login</a>
 
             </Form>
         </Container>
