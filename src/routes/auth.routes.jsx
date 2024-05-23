@@ -14,7 +14,7 @@ export function AuthRoutes(){
         // Recuperar parametro passado pela rota com o /:id
         <Routes>
             <Route path="/" element={<SignIn/>}/>
-            <Route path="/signup" element={<SignUp/>}/>
+            <Route path="/register" element={<SignUp/>}/>
         </Routes>
     );
 }
