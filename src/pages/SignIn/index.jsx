@@ -1,5 +1,5 @@
-import { MyContext } from "../../myContext";
-import { useContext } from "react";
+import { useAuth } from "../../hooks/auth.jsx";
+import { useState } from "react"; // Para criar estados para então armazenar essas informações
 
 import { FiMail, FiLock } from 'react-icons/fi';
 import { Input } from '../../components/Input';
@@ -11,9 +11,17 @@ import { Link } from 'react-router-dom';
 
 
 export function SignIn(){
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-    const data = useContext(MyContext);
-    console.log("Meu contexto =>", data);
+
+    const { signIn } = useAuth();
+
+    // Gosto de utilizar essa nomenclatura handle quando o usuario precisa interagir
+    function handleSignIn(){
+        signIn({ email, password })
+    }
+    
 
     return(
         <Container>
@@ -27,15 +35,17 @@ export function SignIn(){
                     placeholder="E-mail"
                     type="text"
                     icon={ FiMail }
+                    onChange={e => setEmail(e.target.value)}
                 />
 
                 <Input 
                     placeholder="Senha"
                     type="password"
                     icon={ FiLock }
+                    onChange={e => setPassword(e.target.value)}
                 />
 
-                <Button title="Entrar"></Button>
+                <Button title="Entrar" onClick={handleSignIn}></Button>
 
                 <Link to="/register">Criar conta</Link>
 
