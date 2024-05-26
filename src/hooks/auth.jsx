@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 // Bem nos precisamos enviar essas informações para nosso back-end, para isso, vamos importar a api
 import { api } from "../services/api";
 
@@ -19,9 +19,18 @@ function AuthProvider({ children }){
             const response = await api.post("/sessions", {email, password});
             const { user, token } = response.data; // Desestruturar do objeto de resposta
 
+            // trabalha com chave > valor
+            // padrão recomendado @nomeDaAplicação:nomedachave
+            // No localStorage só armazena em formato de texto (string)
+            // Posso usar função do JSON, e usar o stringify que vai pegar o json e transformar em texto
+            localStorage.setItem("@rocketnotes:user", JSON.stringify(user));
+            localStorage.setItem("@rocketnotes:token", token); // Token já é um texto
+
+            //Qual a sacada, eu buscar as informações no localStorage quando ele recarregar a página e preencher o estado
+
             // A partir do momento que o usuário se autentica, ele deve seguir para as proximas requisições
             api.defaults.headers.authorization = `Bearer ${token}`;
-            setData({user, token});
+            setData({ user, token });
             /** Eu vou passar o texto Bearer, estou inserindo um token do tipo Bearer, no cabeçalho por padrão em todas as requisições do usuário 
              * E precisamos guardar essas informações em um estado
             */
@@ -36,8 +45,41 @@ function AuthProvider({ children }){
     }
 
 
+    function signOut(){
+        // Remover do localStorage as informações
+        localStorage.removeItem("@rocketnotes:token");
+        localStorage.removeItem("@rocketnotes:user");
+
+        setData({});
+    }
+
+    // O que vc quer que executa? Ele sempre vai executar após a renderização do componente
+    // Vetor que pode colocar o estado que quiser, só que quando ele mudar, dispara o useEffect novamente. Como não queremos colocar estado dependente, cvamos deixar com o vetor vazio, ou seja,
+    // ele vai ser carregado uma vez após a renderização.  
+    useEffect(() => {
+        const token = localStorage.getItem("@rocketnotes:token");
+        const user = localStorage.getItem("@rocketnotes:user");
+
+        // If para garantir que token e user foram informados
+        // se for informado, insere o token e user no cabeçalho
+        if(token && user){
+            // Se estiver informado
+            api.defaults.headers.authorization = `Bearer ${token}`; // Inserir o token no cabeçalho
+
+            // Salvar dentro do setData, o token e o user e utilizar o JSON.parse() para converter para json. 
+            setData({
+                token,
+                user: JSON.parse(user)
+            });
+        }
+    }, []);
+
     return (
-        <AuthContext.Provider value={ { signIn, user: data.user } }>
+        <AuthContext.Provider value={ { 
+            signIn, 
+            signOut,
+            user: data.user
+             } }>
             {children} 
         </AuthContext.Provider>
     )
