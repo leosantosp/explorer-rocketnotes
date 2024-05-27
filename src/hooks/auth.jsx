@@ -29,7 +29,11 @@ function AuthProvider({ children }){
             //Qual a sacada, eu buscar as informações no localStorage quando ele recarregar a página e preencher o estado
 
             // A partir do momento que o usuário se autentica, ele deve seguir para as proximas requisições
-            api.defaults.headers.authorization = `Bearer ${token}`;
+            // api.defaults.headers.authorization = `Bearer ${token}`;
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+
+
             setData({ user, token });
             /** Eu vou passar o texto Bearer, estou inserindo um token do tipo Bearer, no cabeçalho por padrão em todas as requisições do usuário 
              * E precisamos guardar essas informações em um estado
@@ -53,6 +57,23 @@ function AuthProvider({ children }){
         setData({});
     }
 
+    async function updateProfile({ user }){
+        try {
+            
+            await api.put("/users", user); // Preciso atualizar as informações no storage e no state
+            localStorage.setItem("@rocketnotes:user", JSON.stringify(user)); // Serve para inserir e atualizar
+            setData({ user, token: data.token });
+            alert("Perfil atualizado");
+
+        } catch(error){
+            if(error.response){
+                alert(error.response.data.message);
+            } else {
+                alert("Não foi possível atualizar o perfil");
+            }
+        }
+    }
+
     // O que vc quer que executa? Ele sempre vai executar após a renderização do componente
     // Vetor que pode colocar o estado que quiser, só que quando ele mudar, dispara o useEffect novamente. Como não queremos colocar estado dependente, cvamos deixar com o vetor vazio, ou seja,
     // ele vai ser carregado uma vez após a renderização.  
@@ -64,7 +85,9 @@ function AuthProvider({ children }){
         // se for informado, insere o token e user no cabeçalho
         if(token && user){
             // Se estiver informado
-            api.defaults.headers.authorization = `Bearer ${token}`; // Inserir o token no cabeçalho
+            // api.defaults.headers.authorization = `Bearer ${token}`; // Inserir o token no cabeçalho
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
 
             // Salvar dentro do setData, o token e o user e utilizar o JSON.parse() para converter para json. 
             setData({
@@ -78,6 +101,7 @@ function AuthProvider({ children }){
         <AuthContext.Provider value={ { 
             signIn, 
             signOut,
+            updateProfile,
             user: data.user
              } }>
             {children} 
