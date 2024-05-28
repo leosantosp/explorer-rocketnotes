@@ -57,8 +57,17 @@ function AuthProvider({ children }){
         setData({});
     }
 
-    async function updateProfile({ user }){
+    async function updateProfile({ user, avatarFile }){
         try {
+
+            if(avatarFile){
+                const fileUploadForm = new FormData(); // enviar como arquivo
+                fileUploadForm.append("avatar", avatarFile);
+
+                const response = await api.patch("/users/avatar", fileUploadForm);
+                // me devolver usuário com conteúdo atualizado
+                user.avatar = response.data.avatar;
+            }
             
             await api.put("/users", user); // Preciso atualizar as informações no storage e no state
             localStorage.setItem("@rocketnotes:user", JSON.stringify(user)); // Serve para inserir e atualizar
