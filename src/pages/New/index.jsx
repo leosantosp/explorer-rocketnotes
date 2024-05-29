@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import { api } from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 import { Header } from '../../components/Header';
 import { Input } from '../../components/Input';
@@ -13,8 +14,33 @@ import { Link } from 'react-router-dom';
 import { Container, Form } from './styles';
 
 export function New(){
+    
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+
     const [links, setLinks] = useState([]); // Guarda todos os links
     const [newLink, setNewLink] = useState(""); // Estado começa com uma string vazia
+
+    const [tags, setTags] = useState([]); // Guarda todos os links
+    const [newTag, setNewTag] = useState(""); // Estado começa com uma string vazia
+
+    const navigate = useNavigate();
+
+    
+
+
+  
+
+    function handleAddTag(){
+        setTags(prevState => [...prevState, newTag]);
+        setNewTag("");
+    }
+
+    function handleRemoveTag(deleted){
+        setTags(prevState => prevState.filter(tag => tag !== deleted))
+    }
+
+
 
     function handleAddLink(){
         setLinks(prevState => [...prevState, newLink]); // Acessar o conteúdo anterior, monta um novo array com tudo que tinha antes e o novo array
@@ -32,6 +58,19 @@ export function New(){
 
     }
 
+    async function handleNewNote(){
+        await api.post("/notes", {
+            title,
+            description,
+            tags,
+            links
+        });
+
+
+        alert("Nota criada com sucesso!");
+        navigate("/");
+    }
+
 
 
     return(
@@ -45,8 +84,14 @@ export function New(){
                         <Link to="/">Voltar</Link>
                     </header>
 
-                    <Input placeholder="Titulo"/>
-                    <Textarea placeholder="Observações"></Textarea>
+                    <Input 
+                        placeholder="Titulo"
+                        onChange={e => setTitle(e.target.value)}
+                    />
+                    <Textarea 
+                        placeholder="Observações"
+                        onChange={e => setDescription(e.target.value)}
+                    ></Textarea>
 
                     <Section title="Links úteis">
                         {
@@ -69,12 +114,29 @@ export function New(){
 
                     <Section title="Marcadores">
                         <div className="tags">
-                            <NoteItem value="React" />
-                            <NoteItem isNew placeholder="Nova tag"/>
+                            { 
+                                tags.map((tag,index) => (
+                                    <NoteItem 
+                                        key={String(index)}
+                                        value={tag}
+                                        onClick={() => handleRemoveTag(tag)}
+                                    />
+                                ))
+                            }
+                            <NoteItem 
+                                isNew 
+                                placeholder="Nova tag"
+                                onChange={e => setNewTag(e.target.value)}
+                                value={newTag}
+                                onClick={handleAddTag}
+                            />
                         </div>
                     </Section>
 
-                    <Button title="Salvar"/>
+                    <Button 
+                        title="Salvar"
+                        onClick={handleNewNote}
+                    />
                 </Form>
              </main>
         </Container>
