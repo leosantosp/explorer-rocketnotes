@@ -12,7 +12,21 @@ import { Note } from '../../components/Note';
 
 export function Home(){
     const [tags, setTags] = useState([]);
+    const [tagsSelected, setTagsSelected] = useState([]);
+    const [search, setSearch] = useState("");
+    const [notes, setNotes] = useState([]);
 
+    function handleTagSelected(tagName){
+        const alreadySelected = tagsSelected.includes(tagName);
+
+        if(alreadySelected){
+            const filteredTags = tagsSelected.filter(tag => tag !== tagName);
+            setTagsSelected(filteredTags);
+        } else {
+            setTagsSelected(prevState => [...prevState, tagName]);
+        }
+
+    }
     
 
 
@@ -28,6 +42,15 @@ export function Home(){
         fetchTags();
     }, []);
 
+    useEffect(() => {
+        async function fetchNotes(){
+            const response = await api.get(`/notes?title=${search}&tags=${tagsSelected}`);
+            setNotes(response.data);
+        }
+
+        fetchNotes();
+    }, [tagsSelected, search]); // Todos os estados que você colocar, quando mudar o conteúdo de um dos dois, ele executará novamente o useEffect
+
     return(
         <Container>
             <Brand>
@@ -39,9 +62,9 @@ export function Home(){
             <Menu>
                 <li>
                     <ButtonText 
-                        title="Todos" 
-                        isActive 
-
+                      title="Todos"
+                      onClick={() => handleTagSelected("all")}
+                      $isactive={tagsSelected.length === 0} //pegar esse estado e verificar o tamanho
                     />
                 </li>
                 {
@@ -49,6 +72,8 @@ export function Home(){
                         <li key={String(tag.id)}>
                             <ButtonText
                                 title={tag.name}
+                                onClick={() => handleTagSelected(tag.name)}
+                                $isactive={tagsSelected.includes(tag.name)}
                             />
                         </li>        
                     ))   
@@ -57,18 +82,23 @@ export function Home(){
             </Menu>
 
             <Search>
-                <Input placeholder="Pesquisar pelo título" icon={ FiSearch }/>
+                <Input 
+                    placeholder="Pesquisar pelo título" 
+                    icon={ FiSearch }
+                    onChange={(e) => setSearch(e.target.value)}
+                />
             </Search>
 
             <Content>
                 <Section title="Minhas notas">
-                    <Note data={{
-                            title: 'React', 
-                            tags: [
-                                {id: '1', name: 'react'},
-                                {id: '2', name: 'rocketseat'}
-                            ]
-                        }}/>
+                    {
+                        notes.map(note => (
+                            <Note 
+                             key={String(note.id)}
+                                data={note}
+                            />
+                        ))
+                    }
                 </Section>
 
             </Content>
