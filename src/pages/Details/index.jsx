@@ -1,3 +1,7 @@
+import { useParams, useNavigate } from "react-router-dom"; // Serve para buscar pelos parâmetros que existe na rota. 
+import { useState, useEffect } from "react";
+import { api } from "../../services/api";
+
 import { Container, Links, Content } from './styles';
 
 import { Header } from '../../components/Header';
@@ -11,44 +15,90 @@ import { ButtonText } from '../../components/ButtonText';
 
 export function Details(){
 
+    const params = useParams(); // Criando a função
+    const navigate = useNavigate();
+    // Criar useEffect para buscar os dados da nota toda vez que ela for buscada e um estado para armazenar os dados da nota
+
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+        async function fetchNote(){
+            const response = await api.get(`/notes/${params.id}`);
+            setData(response.data);
+        }
+
+        fetchNote();
+    }, []);
+
+    function handleBack(){
+        navigate("/");
+    }
+
+    async function handleRemove(){
+        const confirm = window.confirm("Deseja realmente remover a nota?");
+
+        if(confirm){
+          await api.delete(`/notes/${params.id}`); 
+          navigate("/"); 
+        }
+    }
+
+
     return(
         <Container>
             <Header/>
-            <main>
-                <Content>
+            {
+                data && // Se tem conteúdo, mostra o data
+                <main>
+                    <Content>
 
-                    <ButtonText title="Excluir nota"></ButtonText>
+                        <ButtonText 
+                            title="Excluir nota"
+                            onClick={handleRemove}
+                        ></ButtonText>
 
-                    <h1>Introdução ao React</h1>
-                    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-                       A corrupti alias adipisci soluta odit. Iusto ut rem nostrum magnam, 
-                       unde consequuntur accusamus minima incidunt? Voluptate dolor optio repudiandae omnis quos!
-                       Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-                       A corrupti alias adipisci soluta odit. Iusto ut rem nostrum magnam, 
-                       unde consequuntur accusamus minima incidunt? Voluptate dolor optio repudiandae omnis quos!</p>
-                    
-                    <Section title="Links úteis">
-                        <Links>
-                            <li>
-                                <a href="#">https://www.rocketseat.com.br/</a>
-                            </li>
-                            <li>
-                                <a href="#">https://www.rocketseat.com.br/</a>
-                            </li>
-                            <li>
-                                <a href="#">https://www.rocketseat.com.br/</a>
-                            </li>
-                        </Links>
-                    </Section>
+                        <h1>{data.title}</h1>
+                        <p>{data.description}</p>
+                        
+                        {
+                            data.links &&
+                            <Section title="Links úteis">
+                                <Links>
+                                    {             
+                                        data.links.map(link => (
+                                            <li key={String(link.id)}>
+                                                <a href={link.url} target="_blank">
+                                                    {link.url}
+                                                </a>
+                                            </li>
+                                        ))  
+                                    }
+                                </Links>
+                            </Section>
+                        }
 
-                    <Section title="Marcadores">
-                        <Tag title="express"/>
-                        <Tag title="nodejs"/>
-                    </Section>
+                        {
+                            data.tags &&
+                            <Section title="Marcadores">
+                                {
+                                    data.tags.map(tag => (
+                                        <Tag
+                                            key={String(tag.id)} 
+                                            title={tag.name}
+                                            />
+                                    ))
+                                }
+                                
+                            </Section>
+                        }
 
-                    <Button title="Voltar"></Button>
-                </Content>
-            </main>
+                        <Button 
+                            title="Voltar"
+                            onClick={handleBack}
+                        ></Button>
+                    </Content>
+                </main>
+            }
         </Container>
     )
 }
