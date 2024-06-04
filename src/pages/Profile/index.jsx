@@ -4,11 +4,14 @@ import { useAuth } from "../../hooks/auth";
 import { Container, Form, Avatar } from './styles';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
-import { Link } from 'react-router-dom';
+
 import avatarPlaceholder from '../../assets/avatar_placeholder.svg';
 import { api } from "../../services/api";
 import { FiArrowLeft, FiUser, FiMail, FiLock, FiCamera } from 'react-icons/fi';
+import { useNavigate } from "react-router-dom";
 export function Profile(){
+
+    const navigate = useNavigate();
 
     const { user, updateProfile } = useAuth();
 
@@ -21,16 +24,21 @@ export function Profile(){
     const [avatar, setAvatar] = useState(avatarUrl); // Se o usuário já tiver avatar, vou colocar aqui
     const [avatarFile, setAvatarFile] = useState(null); // Vou carregar nele por padrão, exclusivamente para carregar a nova imagem
     
+    function handleBack(){
+        navigate(-1);
+    }
 
     async function handleUpdate(){
-        const user = {
+        const updated = {
             name,
             email,
             password: passwordNew,
             old_password: passwordOld
-        }
+        };
+
+        const userUpdated = Object.assign(user, updated);
         
-        await updateProfile({user, avatarFile});
+        await updateProfile({userUpdated, avatarFile});
     }
 
     function handleChangeAvatar(event){
@@ -46,9 +54,9 @@ export function Profile(){
     return(
         <Container>
             <header>
-                <Link to="/">
-                    <FiArrowLeft />
-                </Link>
+                <button type="button" onClick={handleBack}>
+                    <FiArrowLeft size={24}/>
+                </button>
             </header>
 
 

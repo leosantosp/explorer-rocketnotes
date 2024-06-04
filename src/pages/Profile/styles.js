@@ -17,6 +17,11 @@ export const Container = styled.div`
             font-size: 24px;
 
         }
+
+        button {
+            background: none;
+            border: none;
+        }
     }
 `;
 

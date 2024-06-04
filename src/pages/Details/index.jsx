@@ -17,7 +17,8 @@ export function Details(){
 
     const params = useParams(); // Criando a função
     const navigate = useNavigate();
-    // Criar useEffect para buscar os dados da nota toda vez que ela for buscada e um estado para armazenar os dados da nota
+  
+   // Criar useEffect para buscar os dados da nota toda vez que ela for buscada e um estado para armazenar os dados da nota
 
     const [data, setData] = useState(null);
 
@@ -31,7 +32,7 @@ export function Details(){
     }, []);
 
     function handleBack(){
-        navigate("/");
+        navigate(-1);
     }
 
     async function handleRemove(){
@@ -39,7 +40,7 @@ export function Details(){
 
         if(confirm){
           await api.delete(`/notes/${params.id}`); 
-          navigate("/"); 
+          navigate(-1); 
         }
     }
 
